@@ -3,11 +3,11 @@ const buttonEl = document.querySelector("button");
 const timerEl = document.querySelector("span");
 
 const createTimerAnimator = () => {
-  let interval;
+  let interval = null;
 
   const getFormatedTime = (currentTime) => {
     const addZeroToString = (time) =>
-      time.toString().length == 2 ? time : "0" + time;
+      time.toString().length === 1 ? "0" + time : time;
 
     return (
       addZeroToString(currentTime.getHours()) +
@@ -34,18 +34,22 @@ const createTimerAnimator = () => {
   };
 
   return (seconds) => {
-    let secondIncrement = 0;
-    const { hh, mm, ss, currentTime } = getSecondsConverter(seconds);
     clearInterval(interval);
-    interval = setInterval(() => {
+    const { hh, mm, ss, currentTime } = getSecondsConverter(seconds);
+    let secondIncrement = 0;
+
+    const updateTimer = () => {
       currentTime.setHours(hh, mm, ss - secondIncrement);
-      spanTimer = getFormatedTime(currentTime);
-      timerEl.innerHTML = spanTimer;
+      const timer = getFormatedTime(currentTime);
+      timerEl.textContent = timer;
       secondIncrement++;
-      if (spanTimer === "00:00:00") {
+
+      if (timer === "00:00:00") {
         clearInterval(interval);
       }
-    }, 1000);
+    };
+
+    interval = setInterval(updateTimer, 1000);
   };
 };
 
