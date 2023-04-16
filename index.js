@@ -4,61 +4,44 @@ const timerEl = document.querySelector("span");
 
 const createTimerAnimator = () => {
   let interval = null;
-  let secondIncrement = 0;
+  let secondDecrement = 0;
 
   const getSecondsConverter = (seconds) => {
-    const DAY_PER_SECONDS = 86400;
-    if (seconds > DAY_PER_SECONDS) {
-      seconds =
-        seconds - Math.floor(seconds / DAY_PER_SECONDS) * DAY_PER_SECONDS;
-    }
+    const hh = Math.floor(seconds / 3600)
+      .toString()
+      .padStart(2, "0");
 
-    return {
-      hh: Math.floor(seconds / 3600),
-      mm: Math.floor((seconds % 3600) / 60),
-      ss: seconds % 60,
-      currentTime: new Date(),
-    };
+    const mm = Math.floor((seconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+
+    const ss = (seconds % 60).toString().padStart(2, "0");
+
+    return `${hh}:${mm}:${ss}`;
   };
 
-  const getFormatedTime = (currentTime) => {
-    const addZeroToString = (time) =>
-      time.toString().length === 1 ? "0" + time : time;
-
-    return (
-      addZeroToString(currentTime.getHours()) +
-      ":" +
-      addZeroToString(currentTime.getMinutes()) +
-      ":" +
-      addZeroToString(currentTime.getSeconds())
-    );
-  };
-
-  const updateTimer = (hh, mm, ss, currentTime) => {
-    currentTime.setHours(hh, mm, ss - secondIncrement);
-
-    const timer = getFormatedTime(currentTime);
+  const updateTimer = () => {
+    const timer = getSecondsConverter(secondDecrement);
     timerEl.textContent = timer;
 
-    secondIncrement++;
+    secondDecrement--;
     if (timer === "00:00:00") {
       clearInterval(interval);
-      secondIncrement = 0;
+      secondDecrement = 0;
     }
   };
 
   return (seconds) => {
     clearInterval(interval);
-    secondIncrement = 0;
-    const { hh, mm, ss, currentTime } = getSecondsConverter(seconds);
-    interval = setInterval(() => updateTimer(hh, mm, ss, currentTime), 1000);
+    secondDecrement = seconds;
+    interval = setInterval(updateTimer, 1000);
   };
 };
 
 const animateTimer = createTimerAnimator();
 
 inputEl.addEventListener("input", () => {
-  inputEl.value = inputEl.value.replace(/[^0-9]/g, "");
+  inputEl.value = inputEl.value.replace(/^0+|[^0-9]/g, "");
 });
 
 buttonEl.addEventListener("click", () => {
